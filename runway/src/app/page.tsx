@@ -1,12 +1,36 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+// import "../app/data/userMetadata.json"
+import fs from "fs"
 
 export default function Home() {
   const [reviewData, setReviewData] = useState<any[]>([])
   const [appIdInput, setAppIdInput] = useState("")
-  
-  
+  // const userMetadataPath ="../app/data/userMetadata.json";
+
+// Function to read data from localStorage
+const readUserMetadata = () => {
+  const jsonData = localStorage.getItem('searchQuery');
+  if (jsonData) {
+      setAppIdInput(jsonData); // Set the state directly without parsing JSON
+  }
+};
+
+// Function to write data to localStorage
+const writeUserMetadata = (data: string) => {
+  localStorage.setItem('searchQuery', data); // Don't stringify data here
+};
+
+ useEffect(()=>{
+  readUserMetadata()
+ })
+
+ const handleUpdate = (e:any) =>{
+  writeUserMetadata(e.target.value)
+  setAppIdInput(e.target.value)
+ }
+
   const getReviewData = async () => {
     try {
         const res = await fetch(`/api/reviews/${appIdInput}`);
@@ -21,6 +45,8 @@ export default function Home() {
         // Handle error, e.g., show a message to the user
     }
   }
+
+  console.log(appIdInput)
 
 const getColor=(score:number)=>{
   if (score > 7){
@@ -38,7 +64,7 @@ const getColor=(score:number)=>{
       <div className="space-y-10 ">
       <div className="text-4xl">What IOS app do you want to see reviews for?</div>
       <div className="flex justify-center space-x-4 text-2xl">
-      <input className="border w-full px-4 py-2" onChange={(e)=>setAppIdInput(e.target.value)} value={appIdInput}></input>
+      <input className="border w-full px-4 py-2" onChange={handleUpdate} value={appIdInput}></input>
       <button className="border px-4 py-2 bg-primary " type="submit" onClick={getReviewData}>Submit</button>
       </div>
       <div className="text-2xl">ex. dragonvale: 440045374</div>
